@@ -1,7 +1,8 @@
 // eslint-disable-next-line max-classes-per-file
-import { STICKY_LS } from '~/util/constant';
-import App from '~/ts/App';
-import Memo from '~/ts/Memo';
+
+import App from './App';
+import { STICKY_LS } from '../util/constant';
+import Memo from './Memo';
 
 class Renderer {
     constructor(public app: App) {
@@ -33,12 +34,14 @@ class DOMRenderer extends Renderer {
     }
 
     _render() {
-
+        console.log('render tasks');
         const memos: Memo[] = this.app.getMemos();
 
         memos.forEach(memo => {
             this.createMemo(memo);
         });
+
+        localStorage[STICKY_LS] = JSON.stringify(this.app.getMemos());
     }
 
     createMemo(memo: Memo) {

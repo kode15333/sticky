@@ -1,6 +1,6 @@
-import Memo from '~/ts/Memo';
+import Memo from './Memo';
 
-class App extends Set {
+class App extends Set<Memo> {
     static load(json: Memo[]) {
         const app = new App();
         json.forEach(f => {
