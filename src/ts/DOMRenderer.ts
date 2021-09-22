@@ -4,7 +4,7 @@ import App from '~/ts/App';
 import Memo from '~/ts/Memo';
 
 class Renderer {
-    constructor(private app: App) {
+    constructor(public app: App) {
         this.app = app;
     }
 
@@ -20,7 +20,7 @@ class Renderer {
 class DOMRenderer extends Renderer {
     private $wrapper: HTMLElement;
 
-    constructor(private parent: Document, private app: App) {
+    constructor(private parent: Document, public app: App) {
         super(app);
         if (localStorage[STICKY_LS]) {
             this.app = App.load(JSON.parse(localStorage[STICKY_LS]));
@@ -32,7 +32,8 @@ class DOMRenderer extends Renderer {
         this.render();
     }
 
-    private _render() {
+    _render() {
+
         const memos: Memo[] = this.app.getMemos();
 
         memos.forEach(memo => {
@@ -40,7 +41,7 @@ class DOMRenderer extends Renderer {
         });
     }
 
-    private createMemo(memo: Memo) {
+    createMemo(memo: Memo) {
         const { id, top, left, zIndex, text } = memo;
         const html = `<div 
                 class="sticky" 
