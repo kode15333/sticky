@@ -1,13 +1,15 @@
 class Memo {
     constructor(
-        private id = 0,
-        private top = 0,
-        private left = 0,
-        private text = ''
+        public id = 0,
+        public top = 0,
+        public left = 0,
+        public zIndex = 0,
+        public text = ''
     ) {
         this.id = id;
         this.top = top;
         this.left = left;
+        this.zIndex = zIndex;
         this.text = text;
     }
 
@@ -15,8 +17,8 @@ class Memo {
         return new Memo(id);
     }
 
-    static load({ id, top, left, text }: Memo) {
-        return new Memo(id, top, left, text);
+    static load({ id, top, left, zIndex, text }: Memo) {
+        return new Memo(id, top, left, zIndex, text);
     }
 
     setText(value: string) {
@@ -28,9 +30,13 @@ class Memo {
         this.left = x;
     }
 
+    setZIndex(z = 0) {
+        this.zIndex = z;
+    }
+
     getInfo() {
-        const { id, top, left, text } = this;
-        return { id, top, left, text };
+        const { id, top, left, zIndex, text } = this;
+        return { id, top, left, zIndex, text };
     }
 }
 
