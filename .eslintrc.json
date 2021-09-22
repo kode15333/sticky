@@ -18,6 +18,8 @@
   "rules": {
     "indent": "off",
     "import/extensions": "off",
-    "import/no-unresolved" : "off"
+    "import/no-unresolved" : "off",
+    "no-underscore-dangle": "off",
+    "class-methods-use-this": "off"
   }
 }

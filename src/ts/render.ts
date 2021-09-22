@@ -1,22 +1,10 @@
+// eslint-disable-next-line max-classes-per-file
 import { STICKY_LS } from '~/util/constant';
+import App from '~/ts/App';
+import Memo from '~/ts/Memo';
 
-class Memo {
-    constructor(
-        private id = '0',
-        private top = 0,
-        private left = 0,
-        private text = ''
-    ) {
-        this.id = id;
-        this.top = top;
-        this.left = left;
-        this.text = text;
-    }
-}
-
-class Sticky extends Memo {}
 class Renderer {
-    constructor(public app: any) {
+    constructor(private app: App) {
         this.app = app;
     }
 
@@ -30,32 +18,59 @@ class Renderer {
 }
 
 class DOMRenderer extends Renderer {
-    constructor(private id: string, private app: any) {
+    private $wrapper: HTMLElement;
+
+    constructor(private parent: Document, private app: App) {
         super(app);
-    }
-
-    loadStickys = () => {
-        const localSticky: Sticky[] = JSON.parse(
-            localStorage.getItem(STICKY_LS) || ''
-        );
-
-        if (localSticky === null || !localSticky.length) {
-            // 하나도 없는 경우 기본 메모장 생성
-            const newSticky = new Sticky();
-            newSticky.SetDate();
-            attachSticky(newSticky);
-
-            return;
+        if (localStorage[STICKY_LS]) {
+            this.app = App.load(JSON.parse(localStorage[STICKY_LS]));
+        } else {
+            localStorage[STICKY_LS] = JSON.stringify([]);
         }
 
-        localSticky.forEach(sticky => {
-            const { id, left, top, text, zIndex, date } = sticky;
-            const curSticky = new Sticky(id, left, top, text, zIndex, date);
-            attachSticky(curSticky);
+        this.$wrapper = parent.querySelector('#stickWrap')!;
+        this.render();
+    }
+
+    private _render() {
+        const memos: Memo[] = this.app.getMemos();
+
+        memos.forEach(memo => {
+            this.createMemo(memo);
         });
-    };
+    }
 
-    init() {}
+    private createMemo(memo: Memo) {
+        const { id, top, left, zIndex, text } = memo;
+        const html = `<div 
+                class="sticky" 
+                id="${id}"
+                style="
+                    top: ${`${top}px`};
+                    left: ${`${left}px`};
+                    z-index: ${zIndex};">
+                <nav class="side_nav">
+                    <ol></ol>
+                </nav>
+                <nav class="top_nav">
+                    <a class="add">
+                        <i class="fa fa-plus"></i>
+                    </a>
+                    <a class="save">
+                        <i class="fa fa-floppy-o"></i>
+                    </a>
+                    <div class="right">
+                        <a class="get">
+                            <i class="fa fa-list"></i>
+                        </a>
+                        <a class="del">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </nav>
+                <textarea name="txt" class="txt">${text}</textarea>
+            </div>`;
+        this.$wrapper.insertAdjacentHTML('beforeend', html);
+    }
 }
-
-new DOMRenderer('app', new App());
+new DOMRenderer(document, new App());
