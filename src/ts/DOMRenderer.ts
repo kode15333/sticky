@@ -30,7 +30,7 @@ class DOMRenderer extends Renderer {
         this.render();
     }
 
-    putStickyWithZIndex = (sticky: Sticky) => {
+    private putStickyWithZIndex = (sticky: Sticky) => {
         let maxZIndex = -1;
 
         this.app.getStickies().forEach(({ id, top, left, zIndex }) => {
@@ -45,7 +45,7 @@ class DOMRenderer extends Renderer {
         sticky.setZIndex(maxZIndex + 1);
     };
 
-    dragChangeZIndex = (sticky: Sticky) => {
+    private dragChangeZIndex = (sticky: Sticky) => {
         const { id: targetId, zIndex: targetZIndex } = sticky.getInfo();
 
         this.app.getStickies().forEach(stk => {
@@ -58,7 +58,7 @@ class DOMRenderer extends Renderer {
         });
     };
 
-    handleAddBtn = (event: Event) => {
+    private handleAddBtn = (event: Event) => {
         event.stopPropagation();
         const newSticky = Sticky.get(this.app.getNewId());
         this.putStickyWithZIndex(newSticky);
@@ -66,7 +66,7 @@ class DOMRenderer extends Renderer {
         this.render();
     };
 
-    handleSaveBtn = (event: Event, sticky: Sticky) => {
+    private handleSaveBtn = (event: Event, sticky: Sticky) => {
         event.stopPropagation();
         const target = this.parent.getElementById(
             `${sticky.getInfo().id}`
@@ -82,7 +82,7 @@ class DOMRenderer extends Renderer {
         this.render();
     };
 
-    handleGetBtn = (event: Event) => {
+    private handleGetBtn = (event: Event) => {
         event.stopPropagation();
         const target = event.currentTarget as HTMLElement;
         target
@@ -91,14 +91,13 @@ class DOMRenderer extends Renderer {
             .classList.toggle('active');
     };
 
-    handleDelBtn = (event: Event, sticky: Sticky) => {
+    private handleDelBtn = (event: Event, sticky: Sticky) => {
         event.stopPropagation();
         this.app.removeSticky(sticky);
         this.render();
     };
 
-    startDrag = (event: Event, sticky: Sticky) => {
-        console.log('star Drag');
+    private startDrag = (event: Event, sticky: Sticky) => {
         const $target = event.currentTarget as HTMLElement;
         this.dragSticky = $target.parentNode as HTMLDivElement;
         if (!this.dragSticky) return;
@@ -109,26 +108,25 @@ class DOMRenderer extends Renderer {
         this.stickyLeft = this.dragSticky.offsetLeft - clientX;
         this.stickyTop = this.dragSticky.offsetTop - clientY;
 
-        document.onmousemove = this.moveDrag;
-        document.onmouseup = this.stopDrag;
+        this.$wrapper.onmousemove = this.moveDrag;
+        this.$wrapper.onmouseup = this.stopDrag;
         this.dragSticky.style.zIndex = '999';
         this.dragChangeZIndex(sticky);
     };
 
-    moveDrag = ({ clientX, clientY }: MouseEvent) => {
+    private moveDrag = ({ clientX, clientY }: MouseEvent) => {
         if (!this.dragSticky) return;
-        this.dragSticky.style.cssText = `top: ${clientY + this.stickyTop}px;
-                                         left: ${clientX + this.stickyLeft}px;`;
+        this.dragSticky.style.top = `${clientY + this.stickyTop}px`;
+        this.dragSticky.style.left = `${clientX + this.stickyLeft}px`;
     };
 
-    stopDrag = (event: MouseEvent) => {
+    private stopDrag = (event: MouseEvent) => {
         event.stopPropagation();
-        event.preventDefault();
         if (!this.dragSticky || !this.currentSticky) return;
-        this.dragSticky.style.zIndex = '0';
 
-        document.onmousemove = null;
-        document.onmouseup = null;
+        this.$wrapper.onmousemove = null;
+        this.$wrapper.onmouseup = null;
+
         const { top, left } = this.dragSticky.style;
         this.currentSticky.setPosition(
             Number.parseInt(top, 10),
@@ -139,7 +137,7 @@ class DOMRenderer extends Renderer {
         this.render();
     };
 
-    addEvent = (el: HTMLElement, sticky: Sticky) => {
+    private addEvent = (el: HTMLElement, sticky: Sticky) => {
         const addBtn = el.querySelector('.add')!;
         const saveBtn = el.querySelector('.save')!;
         const getBtn = el.querySelector('.get')!;
@@ -155,7 +153,7 @@ class DOMRenderer extends Renderer {
         topNav.addEventListener('mousedown', e => this.startDrag(e, sticky));
     };
 
-    makeStickyHTML = (sticky: Sticky) => {
+    private makeStickyHTML = (sticky: Sticky) => {
         const { id, top, left, text, zIndex, date } = sticky;
         const $div = document.createElement('div');
         $div.classList.add('sticky');
@@ -168,11 +166,11 @@ class DOMRenderer extends Renderer {
         this.addEvent($div, sticky);
     };
 
-    createSticky(sticky: Sticky) {
+    private createSticky(sticky: Sticky) {
         this.makeStickyHTML(sticky);
     }
 
-    _render() {
+    private _render() {
         console.log('render tasks');
         this.$wrapper.innerHTML = '';
         const stickies: Sticky[] = this.app.getStickies();
