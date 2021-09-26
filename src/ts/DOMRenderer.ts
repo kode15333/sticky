@@ -7,7 +7,15 @@ import checkInside from '../util/checkInsede';
 const STICKY_LS = 'sticky_storage';
 
 class DOMRenderer extends Renderer {
-    private $wrapper: HTMLElement;
+    public $wrapper: HTMLElement;
+
+    public stickyTop: number = 0;
+
+    public stickyLeft: number = 0;
+
+    public dragSticky?: HTMLElement;
+
+    public currentSticky?: Sticky;
 
     constructor(private parent: Document, public app: App) {
         super(app);
@@ -22,22 +30,44 @@ class DOMRenderer extends Renderer {
         this.render();
     }
 
-    handleAddBtn = () => {
+    putStickyWithZIndex = (sticky: Sticky) => {
         let maxZIndex = -1;
-        const newSticky = Sticky.get(this.app.getNewId());
-        this.app.getStickies().forEach(({ top, left, zIndex }) => {
-            if (checkInside(newSticky, { top, left })) {
+
+        this.app.getStickies().forEach(({ id, top, left, zIndex }) => {
+            if (id === sticky.getInfo().id) return;
+            if (checkInside(sticky, { top, left })) {
                 if (maxZIndex < zIndex) {
                     maxZIndex = zIndex;
                 }
             }
         });
-        newSticky.setZIndex(maxZIndex + 1);
+
+        sticky.setZIndex(maxZIndex + 1);
+    };
+
+    dragChangeZIndex = (sticky: Sticky) => {
+        const { id: targetId, zIndex: targetZIndex } = sticky.getInfo();
+
+        this.app.getStickies().forEach(stk => {
+            const { id, zIndex } = stk.getInfo();
+            if (id === targetId) return;
+
+            if (checkInside(sticky, stk) && targetZIndex < zIndex) {
+                stk.setZIndex(zIndex - 1);
+            }
+        });
+    };
+
+    handleAddBtn = (event: Event) => {
+        event.stopPropagation();
+        const newSticky = Sticky.get(this.app.getNewId());
+        this.putStickyWithZIndex(newSticky);
         this.app.addStickies(newSticky);
         this.render();
     };
 
-    handleSaveBtn = (sticky: Sticky) => {
+    handleSaveBtn = (event: Event, sticky: Sticky) => {
+        event.stopPropagation();
         const target = this.parent.getElementById(
             `${sticky.getInfo().id}`
         ) as HTMLElement;
@@ -60,24 +90,52 @@ class DOMRenderer extends Renderer {
             .classList.toggle('active');
     };
 
-    handleDelBtn = (sticky: Sticky) => {
-        const { id: targetId, zIndex: targetZIndex } = sticky.getInfo();
-
-        this.app.getStickies().forEach(stk => {
-            const { id, zIndex } = stk.getInfo();
-            if (id === targetId) return;
-
-            if (checkInside(sticky, stk) && targetZIndex < zIndex) {
-                sticky.setZIndex(zIndex - 1);
-            }
-        });
-
+    handleDelBtn = (event: Event, sticky: Sticky) => {
+        event.stopPropagation();
         this.app.removeSticky(sticky);
         this.render();
     };
 
-    handleTextArea = (str: string, sticky: Sticky) => {
-        console.log('st', str, sticky.getInfo());
+    startDrag = (event: Event, sticky: Sticky) => {
+        console.log('star Drag');
+        const $target = event.currentTarget as HTMLElement;
+        this.dragSticky = $target.parentNode as HTMLDivElement;
+        if (!this.dragSticky) return;
+
+        this.currentSticky = sticky;
+        const { clientX, clientY } = event as MouseEvent;
+
+        this.stickyLeft = this.dragSticky.offsetLeft - clientX;
+        this.stickyTop = this.dragSticky.offsetTop - clientY;
+
+        document.onmousemove = this.moveDrag;
+        document.onmouseup = this.stopDrag;
+        this.dragSticky.style.zIndex = '999';
+        this.dragChangeZIndex(sticky);
+    };
+
+    moveDrag = ({ clientX, clientY }: MouseEvent) => {
+        if (!this.dragSticky) return;
+        this.dragSticky.style.cssText = `top: ${clientY + this.stickyTop}px;
+                                         left: ${clientX + this.stickyLeft}px;`;
+    };
+
+    stopDrag = (event: MouseEvent) => {
+        event.stopPropagation();
+        event.preventDefault();
+        if (!this.dragSticky || !this.currentSticky) return;
+        this.dragSticky.style.zIndex = '0';
+
+        document.onmousemove = null;
+        document.onmouseup = null;
+        const { top, left } = this.dragSticky.style;
+        this.currentSticky.setPosition(
+            Number.parseInt(top, 10),
+            Number.parseInt(left, 10)
+        );
+
+        this.putStickyWithZIndex(this.currentSticky);
+        this.render();
     };
 
     addEvent = (el: HTMLElement, sticky: Sticky) => {
@@ -85,16 +143,15 @@ class DOMRenderer extends Renderer {
         const saveBtn = el.querySelector('.save')!;
         const getBtn = el.querySelector('.get')!;
         const delBtn = el.querySelector('.del')!;
-        // const textArea = el.querySelector('textarea')!;
+        const topNav = el.querySelector('.top_nav')!;
 
-        addBtn.addEventListener('click', this.handleAddBtn);
-        saveBtn.addEventListener('click', () => this.handleSaveBtn(sticky));
-        getBtn.addEventListener('click', this.handleGetBtn);
-        delBtn.addEventListener('click', () => this.handleDelBtn(sticky));
-        // textArea.addEventListener('input', event => {
-        //     const { value } = event.target as HTMLTextAreaElement;
-        //     this.handleTextArea(value, id);
-        // });
+        addBtn.addEventListener('mousedown', this.handleAddBtn);
+        saveBtn.addEventListener('mousedown', e =>
+            this.handleSaveBtn(e, sticky)
+        );
+        getBtn.addEventListener('mousedown', this.handleGetBtn);
+        delBtn.addEventListener('mousedown', e => this.handleDelBtn(e, sticky));
+        topNav.addEventListener('mousedown', e => this.startDrag(e, sticky));
     };
 
     makeStickyHTML = (sticky: Sticky) => {
