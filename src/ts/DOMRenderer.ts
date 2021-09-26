@@ -2,6 +2,7 @@ import App from './App';
 import Renderer from './Renderer';
 import Sticky from './models/Sticky';
 import { makeSticky } from '../util/makeTemplate';
+import checkInside from '../util/checkInsede';
 
 const STICKY_LS = 'sticky_storage';
 
@@ -22,8 +23,19 @@ class DOMRenderer extends Renderer {
     }
 
     handleAddBtn = () => {
-        console.log('add');
-        console.log(this.app.getNewId());
+        let maxZIndex = -1;
+        const newSticky = Sticky.get(this.app.getNewId());
+        const stickyList = this.app.getStickies();
+        stickyList.forEach(({ top, left, zIndex }) => {
+            if (checkInside(newSticky, { top, left })) {
+                if (maxZIndex < zIndex) {
+                    maxZIndex = zIndex;
+                }
+            }
+        });
+        newSticky.setZIndex(maxZIndex + 1);
+        this.app.addStickies(newSticky);
+        this.render();
     };
 
     handleSaveBtn = (sticky: Sticky) => {
