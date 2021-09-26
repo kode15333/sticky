@@ -83,6 +83,7 @@ class DOMRenderer extends Renderer {
     };
 
     handleGetBtn = (event: Event) => {
+        event.stopPropagation();
         const target = event.currentTarget as HTMLElement;
         target
             .closest('.sticky')!
