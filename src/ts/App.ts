@@ -1,24 +1,24 @@
-import Memo from './Memo';
+import Sticky from './models/Sticky';
 
-class App extends Set<Memo> {
-    static load(json: Memo[]) {
+class App extends Set<Sticky> {
+    static load(json: Sticky[]) {
         const app = new App();
         json.forEach(f => {
-            app.addMemo(Memo.load(f));
+            app.addStickies(Sticky.load(f));
         });
 
         return app;
     }
 
-    addMemo(memo: Memo) {
-        super.add(memo);
+    addStickies(sticky: Sticky) {
+        super.add(sticky);
     }
 
-    removeMemo(memo: Memo) {
-        super.delete(memo);
+    removeSticky(sticky: Sticky) {
+        super.delete(sticky);
     }
 
-    getMemos() {
+    getStickies() {
         return Array.from(super.values());
     }
 }
