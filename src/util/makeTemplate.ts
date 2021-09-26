@@ -1,6 +1,13 @@
-export const makeSticky = (text = '') => {
+export const makeSticky = (
+    id = 0,
+    text = '',
+    date = new Date().toLocaleDateString()
+) => {
     return `<nav class="side_nav">
-                    <ol></ol>
+                    <ol>
+                        <li>ID : ${id}</li>
+                        <li>DATE : ${date}</li>
+                    </ol>
                 </nav>
                 <nav class="top_nav">
                     <a class="add">
