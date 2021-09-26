@@ -3,8 +3,8 @@ import Renderer from './Renderer';
 import Sticky from './models/Sticky';
 import { makeSticky } from '../util/makeTemplate';
 import checkInside from '../util/checkInsede';
+import { STICKY_LS } from '../util/constant';
 
-const STICKY_LS = 'sticky_storage';
 
 class DOMRenderer extends Renderer {
     public $wrapper: HTMLElement;
@@ -170,7 +170,7 @@ class DOMRenderer extends Renderer {
         this.makeStickyHTML(sticky);
     }
 
-    private _render() {
+    _render() {
         console.log('render tasks');
         this.$wrapper.innerHTML = '';
         const stickies: Sticky[] = this.app.getStickies();
