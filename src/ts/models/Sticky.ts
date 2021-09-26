@@ -26,6 +26,10 @@ class Sticky extends Memo {
         this.zIndex = z;
         return this;
     }
+
+    setDate(date = new Date().toLocaleDateString()) {
+        this.date = date;
+    }
 }
 
 export default Sticky;

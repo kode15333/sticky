@@ -35,7 +35,8 @@ class DOMRenderer extends Renderer {
         sticky
             .setPosition(Number.parseInt(top, 10), Number.parseInt(left, 10))
             .setText(text)
-            .setZIndex(Number.parseInt(zIndex, 10));
+            .setZIndex(Number.parseInt(zIndex, 10))
+            .setDate();
 
         this.render();
     };
