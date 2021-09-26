@@ -1,25 +1,32 @@
 import Memo from './Memo';
+import { STICKY_HEIGHT, STICKY_WIDTH } from '../../util/constant';
 
 class Sticky extends Memo {
-    constructor(
-        public id = 0,
-        public top = 0,
-        public left = 0,
-        public text = '',
-        public zIndex = 0,
-        public date = new Date().toLocaleDateString()
-    ) {
+    public zIndex;
+
+    public date;
+
+    constructor({
+        id = 0,
+        top = 0,
+        left = 0,
+        text = '',
+        zIndex = 0,
+        date = new Date().toLocaleDateString(),
+    }) {
         super(id, top, left, text);
         this.zIndex = zIndex;
         this.date = date;
     }
 
     static get(id = 0) {
-        return new Sticky(id);
+        const top = Math.floor(Math.random() * STICKY_HEIGHT);
+        const left = Math.floor(Math.random() * STICKY_WIDTH);
+        return new Sticky({ id, top, left });
     }
 
     static load({ id, top, left, text, zIndex, date }: Sticky) {
-        return new Sticky(id, top, left, text, zIndex, date);
+        return new Sticky({ id, top, left, text, zIndex, date });
     }
 
     setZIndex(z = 999) {
