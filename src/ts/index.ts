@@ -1,7 +1,6 @@
-import message from "./message";
+import App from './App';
+import DOMRenderer from './DOMRenderer';
 
-console.log(message);
-
-const hello = () => {
-    return ";";
-};
+window.addEventListener('DOMContentLoaded', () => {
+    new DOMRenderer(document, new App());
+});
