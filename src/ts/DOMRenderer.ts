@@ -21,21 +21,28 @@ class DOMRenderer extends Renderer {
         this.render();
     }
 
-    _render() {
-        console.log('render tasks');
-        const stickies: Sticky[] = this.app.getStickies();
-        stickies.forEach(sticky => {
-            this.createSticky(sticky);
-        });
-    }
-
     handleAddBtn = (id: number) => {
         console.log('add', id);
     };
 
     handleSaveBtn = (id: number) => {
-        console.log('save', id);
-        console.log(this.app.getStickyInfo(id));
+        const target = this.parent.getElementById(`${id}`) as HTMLElement;
+        const { top, left, zIndex } = target.style;
+        const { value: text } = target.querySelector('textarea')!;
+
+        this.app.getStickies().forEach(sticky => {
+            if (sticky.id === id) {
+                sticky
+                    .setPosition(
+                        Number.parseInt(top, 10),
+                        Number.parseInt(left, 10)
+                    )
+                    .setText(text)
+                    .setZIndex(Number.parseInt(zIndex, 10));
+            }
+        });
+
+        this.render();
     };
 
     handleGetBtn = (id: number) => {
@@ -68,20 +75,28 @@ class DOMRenderer extends Renderer {
     };
 
     makeStickyHTML = ({ id, top, left, text, zIndex }: Sticky) => {
-        const divEle = document.createElement('div');
-        divEle.classList.add('sticky');
-        divEle.id = `${id}`;
-        divEle.style.cssText = `top: ${top}px;
+        const $div = document.createElement('div');
+        $div.classList.add('sticky');
+        $div.id = `${id}`;
+        $div.style.cssText = `top: ${top}px;
                                 left: ${left}px;
                                 z-index: ${zIndex};`;
-        divEle.innerHTML = makeSticky(text);
-        this.$wrapper.appendChild(divEle);
-        this.addEvent(divEle, id);
+        $div.innerHTML = makeSticky(text);
+        this.$wrapper.appendChild($div);
+        this.addEvent($div, id);
     };
 
     createSticky(sticky: Sticky) {
-        const { makeStickyHTML } = this;
-        makeStickyHTML(sticky);
+        this.makeStickyHTML(sticky);
+    }
+
+    _render() {
+        console.log('render tasks');
+        const stickies: Sticky[] = this.app.getStickies();
+        stickies.forEach(sticky => {
+            this.createSticky(sticky);
+        });
+        localStorage[STICKY_LS] = JSON.stringify(this.app);
     }
 }
 new DOMRenderer(document, new App());

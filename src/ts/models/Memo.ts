@@ -13,11 +13,13 @@ class Memo {
 
     setText(value: string) {
         this.text = value;
+        return this;
     }
 
-    setPosition({ x = 0, y = 0 }) {
-        this.top = y;
-        this.left = x;
+    setPosition(top = 0, left = 0) {
+        this.top = top;
+        this.left = left;
+        return this;
     }
 
     getInfo() {

@@ -22,6 +22,7 @@ class Sticky extends Memo {
 
     setZIndex(z = 999) {
         this.zIndex = z;
+        return this;
     }
 }
 

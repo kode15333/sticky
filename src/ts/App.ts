@@ -10,6 +10,10 @@ class App extends Set<Sticky> {
         return app;
     }
 
+    toJSON() {
+        return this.getStickies();
+    }
+
     addStickies(sticky: Sticky) {
         super.add(sticky);
     }
