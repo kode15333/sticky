@@ -25,8 +25,7 @@ class DOMRenderer extends Renderer {
     handleAddBtn = () => {
         let maxZIndex = -1;
         const newSticky = Sticky.get(this.app.getNewId());
-        const stickyList = this.app.getStickies();
-        stickyList.forEach(({ top, left, zIndex }) => {
+        this.app.getStickies().forEach(({ top, left, zIndex }) => {
             if (checkInside(newSticky, { top, left })) {
                 if (maxZIndex < zIndex) {
                     maxZIndex = zIndex;
@@ -62,6 +61,17 @@ class DOMRenderer extends Renderer {
     };
 
     handleDelBtn = (sticky: Sticky) => {
+        const { id: targetId, zIndex: targetZIndex } = sticky.getInfo();
+
+        this.app.getStickies().forEach(stk => {
+            const { id, zIndex } = stk.getInfo();
+            if (id === targetId) return;
+
+            if (checkInside(sticky, stk) && targetZIndex < zIndex) {
+                sticky.setZIndex(zIndex - 1);
+            }
+        });
+
         this.app.removeSticky(sticky);
         this.render();
     };

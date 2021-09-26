@@ -37,6 +37,10 @@ class Sticky extends Memo {
     setDate(date = new Date().toLocaleDateString()) {
         this.date = date;
     }
+
+    getInfo() {
+        return this;
+    }
 }
 
 export default Sticky;
