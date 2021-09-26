@@ -26,8 +26,22 @@ class App extends Set<Sticky> {
         return Array.from(super.values());
     }
 
-    getStickyInfo(id: number) {
-        return this.getStickies().find(sticky => sticky.id === id);
+    getNewId() {
+        let newId = 0;
+
+        this.getStickies()
+            .map(sticky => sticky.id)
+            .sort((a, b) => a - b)
+            .every(id => {
+                if (newId >= id) {
+                    newId = id + 1;
+                    return true;
+                }
+
+                return false;
+            });
+
+        return newId;
     }
 }
 

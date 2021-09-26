@@ -23,6 +23,7 @@ class DOMRenderer extends Renderer {
 
     handleAddBtn = () => {
         console.log('add');
+        console.log(this.app.getNewId());
     };
 
     handleSaveBtn = (sticky: Sticky) => {
