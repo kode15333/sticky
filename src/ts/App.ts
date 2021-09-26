@@ -21,6 +21,10 @@ class App extends Set<Sticky> {
     getStickies() {
         return Array.from(super.values());
     }
+
+    getStickyInfo(id: number) {
+        return this.getStickies().find(sticky => sticky.id === id);
+    }
 }
 
 export default App;
