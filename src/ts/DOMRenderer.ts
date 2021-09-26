@@ -21,11 +21,11 @@ class DOMRenderer extends Renderer {
         this.render();
     }
 
-    handleAddBtn = (id: number) => {
-        console.log('add', id);
+    handleAddBtn = () => {
+        console.log('add');
     };
 
-    handleSaveBtn = (id: number) => {
+    handleSaveBtn = ({ id }: Sticky) => {
         const target = this.parent.getElementById(`${id}`) as HTMLElement;
         const { top, left, zIndex } = target.style;
         const { value: text } = target.querySelector('textarea')!;
@@ -45,7 +45,7 @@ class DOMRenderer extends Renderer {
         this.render();
     };
 
-    handleGetBtn = (event: MouseEvent) => {
+    handleGetBtn = (event: Event) => {
         const target = event.currentTarget as HTMLElement;
         target
             .closest('.sticky')!
@@ -53,32 +53,34 @@ class DOMRenderer extends Renderer {
             ?.classList.toggle('active');
     };
 
-    handleDelBtn = (id: number) => {
-        console.log('del', id);
+    handleDelBtn = (sticky: Sticky) => {
+        this.app.removeSticky(sticky);
+        this.render();
     };
 
-    handleTextArea = (str: string, id: number) => {
-        console.log('st', str, id);
+    handleTextArea = (str: string, sticky: Sticky) => {
+        console.log('st', str, sticky.getInfo());
     };
 
-    addEvent = (el: HTMLElement, id: number) => {
+    addEvent = (el: HTMLElement, sticky: Sticky) => {
         const addBtn = el.querySelector('.add')!;
         const saveBtn = el.querySelector('.save')!;
         const getBtn = el.querySelector('.get')!;
         const delBtn = el.querySelector('.del')!;
         // const textArea = el.querySelector('textarea')!;
 
-        addBtn.addEventListener('click', () => this.handleAddBtn(id));
-        saveBtn.addEventListener('click', () => this.handleSaveBtn(id));
-        getBtn.addEventListener('click', e => this.handleGetBtn(e));
-        delBtn.addEventListener('click', () => this.handleDelBtn(id));
+        addBtn.addEventListener('click', this.handleAddBtn);
+        saveBtn.addEventListener('click', () => this.handleSaveBtn(sticky));
+        getBtn.addEventListener('click', this.handleGetBtn);
+        delBtn.addEventListener('click', () => this.handleDelBtn(sticky));
         // textArea.addEventListener('input', event => {
         //     const { value } = event.target as HTMLTextAreaElement;
         //     this.handleTextArea(value, id);
         // });
     };
 
-    makeStickyHTML = ({ id, top, left, text, zIndex, date }: Sticky) => {
+    makeStickyHTML = (sticky: Sticky) => {
+        const { id, top, left, text, zIndex, date } = sticky;
         const $div = document.createElement('div');
         $div.classList.add('sticky');
         $div.id = `${id}`;
@@ -87,7 +89,7 @@ class DOMRenderer extends Renderer {
                                 z-index: ${zIndex};`;
         $div.innerHTML = makeSticky(id, text, date);
         this.$wrapper.appendChild($div);
-        this.addEvent($div, id);
+        this.addEvent($div, sticky);
     };
 
     createSticky(sticky: Sticky) {
@@ -96,6 +98,7 @@ class DOMRenderer extends Renderer {
 
     _render() {
         console.log('render tasks');
+        this.$wrapper.innerHTML = '';
         const stickies: Sticky[] = this.app.getStickies();
         stickies.forEach(sticky => {
             this.createSticky(sticky);
