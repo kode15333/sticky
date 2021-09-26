@@ -25,22 +25,16 @@ class DOMRenderer extends Renderer {
         console.log('add');
     };
 
-    handleSaveBtn = ({ id }: Sticky) => {
-        const target = this.parent.getElementById(`${id}`) as HTMLElement;
+    handleSaveBtn = (sticky: Sticky) => {
+        const target = this.parent.getElementById(
+            `${sticky.getInfo().id}`
+        ) as HTMLElement;
         const { top, left, zIndex } = target.style;
         const { value: text } = target.querySelector('textarea')!;
-
-        this.app.getStickies().forEach(sticky => {
-            if (sticky.id === id) {
-                sticky
-                    .setPosition(
-                        Number.parseInt(top, 10),
-                        Number.parseInt(left, 10)
-                    )
-                    .setText(text)
-                    .setZIndex(Number.parseInt(zIndex, 10));
-            }
-        });
+        sticky
+            .setPosition(Number.parseInt(top, 10), Number.parseInt(left, 10))
+            .setText(text)
+            .setZIndex(Number.parseInt(zIndex, 10));
 
         this.render();
     };
@@ -49,8 +43,8 @@ class DOMRenderer extends Renderer {
         const target = event.currentTarget as HTMLElement;
         target
             .closest('.sticky')!
-            .querySelector('.side_nav')
-            ?.classList.toggle('active');
+            .querySelector('.side_nav')!
+            .classList.toggle('active');
     };
 
     handleDelBtn = (sticky: Sticky) => {
