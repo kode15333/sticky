@@ -182,4 +182,4 @@ class DOMRenderer extends Renderer {
         localStorage[STICKY_LS] = JSON.stringify(this.app);
     }
 }
-new DOMRenderer(document, new App());
+export default DOMRenderer;
