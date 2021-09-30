@@ -1,9 +1,10 @@
 import Sticky from './Sticky';
 
-class Folder {
-    private stickies: Set<Sticky> = new Set<Sticky>();
+class Folder extends Set<Sticky> {
+    private stickies: Sticky[] = [];
 
-    constructor(public id = '', public name = '') {
+    constructor(public id = 0, public name = 'test') {
+        super();
         this.id = id;
         this.name = name;
     }
@@ -21,16 +22,16 @@ class Folder {
         return this.getInfo();
     }
 
-    static get(id = '', name = '') {
+    static get(id = 0, name = '') {
         return new Folder(id, name);
     }
 
     addSticky(sticky: Sticky) {
-        this.stickies.add(sticky);
+        super.add(sticky);
     }
 
     removeSticky(sticky: Sticky) {
-        this.stickies.delete(sticky);
+        super.delete(sticky);
     }
 
     getStickies() {

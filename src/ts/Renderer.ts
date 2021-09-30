@@ -1,4 +1,4 @@
-import App from './App';
+import App from './models/App';
 
 class Renderer {
     constructor(public app: App) {

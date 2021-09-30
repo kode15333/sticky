@@ -14,11 +14,11 @@ class App extends Set<Folder> {
         return this.getFolders();
     }
 
-    private addFolder(folder: Folder) {
+    addFolder(folder: Folder) {
         super.add(folder);
     }
 
-    private getFolders() {
+    getFolders() {
         return Array.from(super.values());
     }
 }

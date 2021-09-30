@@ -1,4 +1,4 @@
-import App from './App';
+import App from './models/App';
 import DOMRenderer from './DOMRenderer';
 
 window.addEventListener('DOMContentLoaded', () => {
