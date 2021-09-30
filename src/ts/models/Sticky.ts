@@ -29,6 +29,10 @@ class Sticky extends Memo {
         return new Sticky({ id, top, left, text, zIndex, date });
     }
 
+    toJSON() {
+        return this.getInfo();
+    }
+
     setZIndex(z = 999) {
         this.zIndex = z;
         return this;
