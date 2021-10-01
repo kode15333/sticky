@@ -4,6 +4,7 @@ class App extends Set<Folder> {
     static load(json: Folder[]) {
         const app = new App();
         json.forEach(f => {
+            // @ts-ignore
             app.addFolder(Folder.load(f));
         });
 
@@ -16,6 +17,10 @@ class App extends Set<Folder> {
 
     addFolder(folder: Folder) {
         super.add(folder);
+    }
+
+    getFolder(id: number) {
+        return this.getFolders().find(f => f.id === id) || Folder.get();
     }
 
     getFolders() {

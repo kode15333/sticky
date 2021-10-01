@@ -1,4 +1,3 @@
-// eslint-disable-next-line max-classes-per-file
 import App from './models/App';
 import Renderer from './Renderer';
 import Sticky from './models/Sticky';
@@ -7,7 +6,9 @@ import checkInside from '../util/checkInsede';
 import { FOLDER_LS } from '../util/constant';
 import Folder from './models/Folder';
 
-class StickyEvent {
+class DOMRenderer extends Renderer {
+    public $wrapper: HTMLElement;
+
     public stickyTop: number = 0;
 
     public stickyLeft: number = 0;
@@ -16,17 +17,25 @@ class StickyEvent {
 
     public currentSticky?: Sticky;
 
+    private currenFolder: number = 0;
+
     private folder: Folder;
 
-    constructor(app: App) {
-        this.folder = app.getFolders()[0];
+    constructor(private parent: Document, public app: App) {
+        super(app);
+        if (!localStorage[FOLDER_LS]) {
+            this.app.addFolder(Folder.get());
+            localStorage[FOLDER_LS] = JSON.stringify(this.app);
+        } else {
+            this.app = App.load(JSON.parse(localStorage[FOLDER_LS]));
+            this.currenFolder = 0;
+        }
+        this.folder = this.app.getFolder(this.currenFolder);
+        this.$wrapper = parent.querySelector('#stickWrap')!;
+        this.render();
     }
 
-    static get(app: App) {
-        return new StickyEvent(app);
-    }
-
-    putStickyWithZIndex = (sticky: Sticky) => {
+    private putStickyWithZIndex = (sticky: Sticky) => {
         let maxZIndex = -1;
 
         this.folder.getStickies().forEach(({ id, top, left, zIndex }) => {
@@ -41,7 +50,7 @@ class StickyEvent {
         sticky.setZIndex(maxZIndex + 1);
     };
 
-    dragChangeZIndex = (sticky: Sticky) => {
+    private dragChangeZIndex = (sticky: Sticky) => {
         const { id: targetId, zIndex: targetZIndex } = sticky.getInfo();
 
         this.folder.getStickies().forEach(stk => {
@@ -54,15 +63,15 @@ class StickyEvent {
         });
     };
 
-    handleAddBtn = (event: Event) => {
+    private handleAddBtn = (event: Event) => {
         event.stopPropagation();
-        const newSticky = Sticky.get(this.app.getNewId());
+        const newSticky = Sticky.get(this.folder.getNewId());
         this.putStickyWithZIndex(newSticky);
-        this.app.addStickies(newSticky);
+        this.folder.addSticky(newSticky);
         this.render();
     };
 
-    handleSaveBtn = (event: Event, sticky: Sticky) => {
+    private handleSaveBtn = (event: Event, sticky: Sticky) => {
         event.stopPropagation();
         const target = this.parent.getElementById(
             `${sticky.getInfo().id}`
@@ -78,7 +87,7 @@ class StickyEvent {
         this.render();
     };
 
-    handleGetBtn = (event: Event) => {
+    private handleGetBtn = (event: Event) => {
         event.stopPropagation();
         const target = event.currentTarget as HTMLElement;
         target
@@ -87,13 +96,13 @@ class StickyEvent {
             .classList.toggle('active');
     };
 
-    handleDelBtn = (event: Event, sticky: Sticky) => {
+    private handleDelBtn = (event: Event, sticky: Sticky) => {
         event.stopPropagation();
-        this.app.removeSticky(sticky);
+        this.folder.removeSticky(sticky);
         this.render();
     };
 
-    startDrag = (event: Event, sticky: Sticky) => {
+    private startDrag = (event: Event, sticky: Sticky) => {
         const $target = event.currentTarget as HTMLElement;
         this.dragSticky = $target.parentNode as HTMLDivElement;
         if (!this.dragSticky) return;
@@ -110,13 +119,13 @@ class StickyEvent {
         this.dragChangeZIndex(sticky);
     };
 
-    moveDrag = ({ clientX, clientY }: MouseEvent) => {
+    private moveDrag = ({ clientX, clientY }: MouseEvent) => {
         if (!this.dragSticky) return;
         this.dragSticky.style.top = `${clientY + this.stickyTop}px`;
         this.dragSticky.style.left = `${clientX + this.stickyLeft}px`;
     };
 
-    stopDrag = (event: MouseEvent) => {
+    private stopDrag = (event: MouseEvent) => {
         event.stopPropagation();
         if (!this.dragSticky || !this.currentSticky) return;
 
@@ -133,13 +142,18 @@ class StickyEvent {
         this.render();
     };
 
-    addEvent = (el: HTMLElement, sticky: Sticky) => {
+    private addEvent = (el: HTMLElement, sticky: Sticky) => {
+        const localSave = document.querySelector('.localSave')!;
+
         const addBtn = el.querySelector('.add')!;
         const saveBtn = el.querySelector('.save')!;
         const getBtn = el.querySelector('.get')!;
         const delBtn = el.querySelector('.del')!;
         const topNav = el.querySelector('.top_nav')!;
 
+        localSave.addEventListener('mousedown', () => {
+            localStorage[FOLDER_LS] = JSON.stringify(this.app);
+        });
         addBtn.addEventListener('mousedown', this.handleAddBtn);
         saveBtn.addEventListener('mousedown', e =>
             this.handleSaveBtn(e, sticky)
@@ -149,7 +163,7 @@ class StickyEvent {
         topNav.addEventListener('mousedown', e => this.startDrag(e, sticky));
     };
 
-    makeStickyHTML = (sticky: Sticky) => {
+    private makeStickyHTML = (sticky: Sticky) => {
         const { id, top, left, text, zIndex, date } = sticky;
         const $div = document.createElement('div');
         $div.classList.add('sticky');
@@ -162,33 +176,15 @@ class StickyEvent {
         this.addEvent($div, sticky);
     };
 
-    createSticky(sticky: Sticky) {
+    private createSticky(sticky: Sticky) {
         this.makeStickyHTML(sticky);
-    }
-}
-
-class DOMRenderer extends Renderer {
-    public $wrapper: HTMLElement;
-    public folder: Folder;
-
-    constructor(private parent: Document, public app: App) {
-        super(app);
-        if (!localStorage[FOLDER_LS]) {
-            localStorage[FOLDER_LS] = JSON.stringify([]);
-            this.app.addFolder(Folder.get());
-        } else {
-            this.app = App.load(JSON.parse(localStorage[FOLDER_LS]));
-        }
-        this.folder = StickyEvent.get(this.app);
-
-        this.$wrapper = parent.querySelector('#stickWrap')!;
-        this.render();
     }
 
     _render() {
         console.log('render tasks');
         this.$wrapper.innerHTML = '';
         const stickies: Sticky[] = this.folder.getStickies();
+        console.log(stickies);
         stickies.forEach(sticky => {
             this.createSticky(sticky);
         });

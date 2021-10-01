@@ -1,19 +1,25 @@
 import Sticky from './Sticky';
 
+type FolderJSON = {
+    id: number;
+    name: string;
+    stickies: Sticky[];
+};
 class Folder extends Set<Sticky> {
-    private stickies: Sticky[] = [];
-
     constructor(public id = 0, public name = 'test') {
         super();
         this.id = id;
         this.name = name;
     }
 
-    static load(json: Folder) {
+    static load(json: FolderJSON) {
         const folder = new Folder(json.id, json.name);
         json.stickies.forEach(f => {
             folder.addSticky(Sticky.load(f));
         });
+        if (json.stickies.length === 0) {
+            folder.addSticky(Sticky.get());
+        }
 
         return folder;
     }
@@ -28,6 +34,7 @@ class Folder extends Set<Sticky> {
 
     addSticky(sticky: Sticky) {
         super.add(sticky);
+        return this;
     }
 
     removeSticky(sticky: Sticky) {
@@ -35,7 +42,7 @@ class Folder extends Set<Sticky> {
     }
 
     getStickies() {
-        return Array.from(this.stickies.values());
+        return Array.from(super.values());
     }
 
     getNewId() {
@@ -57,7 +64,16 @@ class Folder extends Set<Sticky> {
     }
 
     getInfo() {
-        return this;
+        const { id, name } = this;
+        return {
+            id,
+            name,
+            stickies: this.getStickies(),
+        };
+    }
+
+    getId() {
+        return this.id;
     }
 }
 
