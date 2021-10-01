@@ -1,10 +1,10 @@
-import App from './App';
+import App from './models/App';
 import Renderer from './Renderer';
 import Sticky from './models/Sticky';
 import { makeSticky } from '../util/makeTemplate';
 import checkInside from '../util/checkInsede';
-import { STICKY_LS } from '../util/constant';
-
+import { FOLDER_LS } from '../util/constant';
+import Folder from './models/Folder';
 
 class DOMRenderer extends Renderer {
     public $wrapper: HTMLElement;
@@ -17,15 +17,20 @@ class DOMRenderer extends Renderer {
 
     public currentSticky?: Sticky;
 
+    private currenFolder: number = 0;
+
+    private folder: Folder;
+
     constructor(private parent: Document, public app: App) {
         super(app);
-        if (!localStorage[STICKY_LS]) {
-            localStorage[STICKY_LS] = JSON.stringify([]);
-            this.app.addStickies(Sticky.get());
+        if (!localStorage[FOLDER_LS]) {
+            this.app.addFolder(Folder.get());
+            localStorage[FOLDER_LS] = JSON.stringify(this.app);
         } else {
-            this.app = App.load(JSON.parse(localStorage[STICKY_LS]));
+            this.app = App.load(JSON.parse(localStorage[FOLDER_LS]));
+            this.currenFolder = 0;
         }
-
+        this.folder = this.app.getFolder(this.currenFolder);
         this.$wrapper = parent.querySelector('#stickWrap')!;
         this.render();
     }
@@ -33,7 +38,7 @@ class DOMRenderer extends Renderer {
     private putStickyWithZIndex = (sticky: Sticky) => {
         let maxZIndex = -1;
 
-        this.app.getStickies().forEach(({ id, top, left, zIndex }) => {
+        this.folder.getStickies().forEach(({ id, top, left, zIndex }) => {
             if (id === sticky.getInfo().id) return;
             if (checkInside(sticky, { top, left })) {
                 if (maxZIndex < zIndex) {
@@ -48,7 +53,7 @@ class DOMRenderer extends Renderer {
     private dragChangeZIndex = (sticky: Sticky) => {
         const { id: targetId, zIndex: targetZIndex } = sticky.getInfo();
 
-        this.app.getStickies().forEach(stk => {
+        this.folder.getStickies().forEach(stk => {
             const { id, zIndex } = stk.getInfo();
             if (id === targetId) return;
 
@@ -60,9 +65,9 @@ class DOMRenderer extends Renderer {
 
     private handleAddBtn = (event: Event) => {
         event.stopPropagation();
-        const newSticky = Sticky.get(this.app.getNewId());
+        const newSticky = Sticky.get(this.folder.getNewId());
         this.putStickyWithZIndex(newSticky);
-        this.app.addStickies(newSticky);
+        this.folder.addSticky(newSticky);
         this.render();
     };
 
@@ -93,7 +98,7 @@ class DOMRenderer extends Renderer {
 
     private handleDelBtn = (event: Event, sticky: Sticky) => {
         event.stopPropagation();
-        this.app.removeSticky(sticky);
+        this.folder.removeSticky(sticky);
         this.render();
     };
 
@@ -138,12 +143,17 @@ class DOMRenderer extends Renderer {
     };
 
     private addEvent = (el: HTMLElement, sticky: Sticky) => {
+        const localSave = document.querySelector('.localSave')!;
+
         const addBtn = el.querySelector('.add')!;
         const saveBtn = el.querySelector('.save')!;
         const getBtn = el.querySelector('.get')!;
         const delBtn = el.querySelector('.del')!;
         const topNav = el.querySelector('.top_nav')!;
 
+        localSave.addEventListener('mousedown', () => {
+            localStorage[FOLDER_LS] = JSON.stringify(this.app);
+        });
         addBtn.addEventListener('mousedown', this.handleAddBtn);
         saveBtn.addEventListener('mousedown', e =>
             this.handleSaveBtn(e, sticky)
@@ -173,11 +183,12 @@ class DOMRenderer extends Renderer {
     _render() {
         console.log('render tasks');
         this.$wrapper.innerHTML = '';
-        const stickies: Sticky[] = this.app.getStickies();
+        const stickies: Sticky[] = this.folder.getStickies();
+        console.log(stickies);
         stickies.forEach(sticky => {
             this.createSticky(sticky);
         });
-        localStorage[STICKY_LS] = JSON.stringify(this.app);
+        localStorage[FOLDER_LS] = JSON.stringify(this.app);
     }
 }
 export default DOMRenderer;
