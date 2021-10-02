@@ -25,7 +25,7 @@ nav.sidebar {
   left: -20rem;
   width: 20rem;
   height: 100vh;
-  background-color: #212529;
+  background-color: cadetblue;
   color: #fff;
   transition: transform .25s ease-in-out;
 
@@ -50,6 +50,7 @@ nav.sidebar {
         border-bottom: 1px solid #333333;
         background-color: #666666;
 
+
         &:last-child {
           border: none;
         }
@@ -72,7 +73,6 @@ nav.sidebar {
         border: none;
         width: 80px;
         background-color: transparent;
-        border-bottom: 1px solid;
         margin-right: 5px;
         cursor: pointer;
 
@@ -110,7 +110,7 @@ section.stickySection {
       width: 250px;
       height: 300px;
       font-size: 1em;
-      background: #FEF098;
+      background: cadetblue;
       border: 1px solid #ccc;
       box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.3);
       margin: 0;
@@ -153,7 +153,7 @@ section.stickySection {
         box-sizing: border-box;
         width: inherit;
         height: inherit;
-        background: lightyellow;
+        background: oldlace;
         border: none;
         resize: none;
       }
