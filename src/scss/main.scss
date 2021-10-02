@@ -13,6 +13,9 @@
     nav.sidebar,
     section.stickySection{
       transform : translateX(20rem);
+      & .sidebar-toggle i.fa-list:before{
+      content: "\f00d"
+      }
     }
   }
 }
@@ -84,10 +87,15 @@ nav.sidebar {
 section.stickySection {
   transition: transform .25s ease-in-out;
 
-  #menu {
-    cursor: pointer;
-  }
 
+  .sidebar-toggle {
+    margin-left: 5px;
+    font-size: 1.5rem;
+    color: #666;
+    opacity: 0.5;
+    border: none;
+    background: none;
+  }
   #stickyContainer {
     position: relative;
     width: 100%;

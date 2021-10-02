@@ -30,10 +30,28 @@ class DOMRenderer extends Renderer {
             this.app = App.load(JSON.parse(localStorage[FOLDER_LS]));
             this.currenFolder = 0;
         }
+        this.parent = parent;
         this.folder = this.app.getFolder(this.currenFolder);
-        this.$wrapper = parent.querySelector('#stickWrap')!;
+        this.$wrapper = parent.querySelector('#stickyContainer')!;
         this.render();
+        this.addMenuEvent();
     }
+
+    private addMenuEvent = () => {
+        const $menu = this.parent.querySelector('.sidebar-toggle')!;
+        const $app = this.parent.querySelector('#app')!;
+
+        $menu.addEventListener('click', e => {
+            $app.classList.toggle('active');
+            const target = e.target as HTMLElement;
+
+            if ($app.classList.contains('active')) {
+            }
+            // target.c
+        });
+
+        console.log($menu);
+    };
 
     private putStickyWithZIndex = (sticky: Sticky) => {
         let maxZIndex = -1;
@@ -115,7 +133,7 @@ class DOMRenderer extends Renderer {
 
         this.$wrapper.onmousemove = this.moveDrag;
         this.$wrapper.onmouseup = this.stopDrag;
-        this.dragSticky.style.zIndex = '999';
+        this.dragSticky.style.zIndex = '900';
         this.dragChangeZIndex(sticky);
     };
 
@@ -143,7 +161,7 @@ class DOMRenderer extends Renderer {
     };
 
     private addEvent = (el: HTMLElement, sticky: Sticky) => {
-        const localSave = document.querySelector('.localSave')!;
+        // const localSave = document.querySelector('.localSave')!;
 
         const addBtn = el.querySelector('.add')!;
         const saveBtn = el.querySelector('.save')!;
@@ -151,9 +169,9 @@ class DOMRenderer extends Renderer {
         const delBtn = el.querySelector('.del')!;
         const topNav = el.querySelector('.top_nav')!;
 
-        localSave.addEventListener('mousedown', () => {
-            localStorage[FOLDER_LS] = JSON.stringify(this.app);
-        });
+        // localSave.addEventListener('mousedown', () => {
+        //     localStorage[FOLDER_LS] = JSON.stringify(this.app);
+        // });
         addBtn.addEventListener('mousedown', this.handleAddBtn);
         saveBtn.addEventListener('mousedown', e =>
             this.handleSaveBtn(e, sticky)
