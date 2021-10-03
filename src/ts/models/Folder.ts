@@ -25,7 +25,7 @@ class Folder extends Set<Sticky> {
         return this.getInfo();
     }
 
-    static get(id = 0, name = '') {
+    static get(id = 0, name = 'New Folders0') {
         return new Folder(id, name);
     }
 
