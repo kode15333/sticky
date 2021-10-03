@@ -17,9 +17,6 @@ class Folder extends Set<Sticky> {
         json.stickies.forEach(f => {
             folder.addSticky(Sticky.load(f));
         });
-        if (json.stickies.length === 0) {
-            folder.addSticky(Sticky.get());
-        }
 
         return folder;
     }
@@ -42,6 +39,9 @@ class Folder extends Set<Sticky> {
     }
 
     getStickies() {
+        if (super.size === 0) {
+            super.add(Sticky.get());
+        }
         return Array.from(super.values());
     }
 
