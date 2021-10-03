@@ -29,14 +29,14 @@ nav.sidebar {
   color: #fff;
   transition: transform .25s ease-in-out;
 
-  .folder-list {
+  .folder-Container {
     display: flex;
     flex-direction: column;
     justify-content: center;
     border: 1px solid #333333;
     z-index: 999;
 
-    ul {
+    .folder-list {
       width: 100%;
       height: calc(100vh - 50px);
 

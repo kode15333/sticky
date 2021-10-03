@@ -9,6 +9,8 @@ import Folder from './models/Folder';
 class DOMRenderer extends Renderer {
     public $wrapper: HTMLElement;
 
+    public $folders: HTMLElement;
+
     public stickyTop: number = 0;
 
     public stickyLeft: number = 0;
@@ -33,6 +35,7 @@ class DOMRenderer extends Renderer {
         this.parent = parent;
         this.folder = this.app.getFolder(this.currenFolder);
         this.$wrapper = parent.querySelector('#stickyContainer')!;
+        this.$folders = this.parent.querySelector('.folder-list')!;
         this.render();
         this.addMenuEvent();
     }
@@ -213,14 +216,25 @@ class DOMRenderer extends Renderer {
         this.makeStickyHTML(sticky);
     }
 
+    private makeFolderHTML = (folder: Folder) => {
+        const { id, name } = folder;
+        const $li = document.createElement('li');
+        $li.id = `${id}`;
+        $li.style.color = `${this.currenFolder === id && 'blue'}`;
+        $li.innerHTML = name;
+        this.$folders.appendChild($li);
+    };
+
     _render() {
         console.log('render tasks');
         this.$wrapper.innerHTML = '';
-        const stickies: Sticky[] = this.folder.getStickies();
-        console.log(stickies);
+        this.$folders.innerHTML = '';
+        const stickies = this.folder.getStickies();
         stickies.forEach(sticky => {
             this.createSticky(sticky);
         });
+        const folders = this.app.getFolders();
+        folders.forEach(f => this.makeFolderHTML(f));
         localStorage[FOLDER_LS] = JSON.stringify(this.app);
     }
 }
