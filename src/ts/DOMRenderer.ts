@@ -37,20 +37,35 @@ class DOMRenderer extends Renderer {
         this.addMenuEvent();
     }
 
+    setCurrentFolder = () => {
+        this.folder = this.app.getFolder(this.currenFolder);
+        this.render();
+    };
+
     private addMenuEvent = () => {
         const $menu = this.parent.querySelector('.sidebar-toggle')!;
         const $app = this.parent.querySelector('#app')!;
+        const $add = this.parent.querySelector('.folder-control .add')!;
 
-        $menu.addEventListener('click', e => {
+        $menu.addEventListener('click', () => {
             $app.classList.toggle('active');
-            const target = e.target as HTMLElement;
-
-            if ($app.classList.contains('active')) {
-            }
-            // target.c
         });
 
-        console.log($menu);
+        $add.addEventListener('click', () => {
+            let newFolderName = window.prompt(
+                'input folder label',
+                'new Folder'
+            );
+
+            if (!newFolderName || newFolderName.trim().length === 0) {
+                newFolderName = 'new Folder';
+            }
+
+            const id = this.app.getFolders().length;
+            this.app.addFolder(Folder.get(id, newFolderName));
+            this.currenFolder = id;
+            this.setCurrentFolder();
+        });
     };
 
     private putStickyWithZIndex = (sticky: Sticky) => {
