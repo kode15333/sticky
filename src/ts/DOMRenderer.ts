@@ -30,9 +30,9 @@ class DOMRenderer extends Renderer {
             localStorage[FOLDER_LS] = JSON.stringify(this.app);
         } else {
             this.app = App.load(JSON.parse(localStorage[FOLDER_LS]));
-            this.currenFolder = 0;
         }
         this.parent = parent;
+        this.currenFolder = 1;
         this.folder = this.app.getFolder(this.currenFolder);
         this.$wrapper = parent.querySelector('#stickyContainer')!;
         this.$folders = this.parent.querySelector('.folder-list')!;
@@ -48,10 +48,21 @@ class DOMRenderer extends Renderer {
     private addMenuEvent = () => {
         const $menu = this.parent.querySelector('.sidebar-toggle')!;
         const $app = this.parent.querySelector('#app')!;
+        const $list = this.parent.querySelector('.folder-list')!;
         const $add = this.parent.querySelector('.folder-control .add')!;
 
         $menu.addEventListener('click', () => {
             $app.classList.toggle('active');
+        });
+
+        $list.addEventListener('click', e => {
+            const {
+                dataset: { id = 0 },
+            } = e.target as HTMLElement;
+            if (id < 1) return;
+
+            this.currenFolder = +id;
+            this.setCurrentFolder();
         });
 
         $add.addEventListener('click', () => {
@@ -64,7 +75,7 @@ class DOMRenderer extends Renderer {
                 newFolderName = 'new Folder';
             }
 
-            const id = this.app.getFolders().length;
+            const id = this.app.getNewId();
             this.app.addFolder(Folder.get(id, newFolderName));
             this.currenFolder = id;
             this.setCurrentFolder();
@@ -219,7 +230,7 @@ class DOMRenderer extends Renderer {
     private makeFolderHTML = (folder: Folder) => {
         const { id, name } = folder;
         const $li = document.createElement('li');
-        $li.id = `${id}`;
+        $li.dataset.id = `${id}`;
         $li.style.color = `${this.currenFolder === id && 'blue'}`;
         $li.innerHTML = name;
         this.$folders.appendChild($li);
@@ -228,11 +239,11 @@ class DOMRenderer extends Renderer {
     _render() {
         console.log('render tasks');
         this.$wrapper.innerHTML = '';
-        this.$folders.innerHTML = '';
         const stickies = this.folder.getStickies();
         stickies.forEach(sticky => {
             this.createSticky(sticky);
         });
+        this.$folders.innerHTML = '';
         const folders = this.app.getFolders();
         folders.forEach(f => this.makeFolderHTML(f));
         localStorage[FOLDER_LS] = JSON.stringify(this.app);

@@ -19,12 +19,30 @@ class App extends Set<Folder> {
         super.add(folder);
     }
 
-    getFolder(id: number) {
+    getFolder(id = 1) {
         return this.getFolders().find(f => f.id === id) || Folder.get();
     }
 
     getFolders() {
         return Array.from(super.values());
+    }
+
+    getNewId() {
+        let newId = 0;
+
+        this.getFolders()
+            .map(folder => folder.id)
+            .sort((a, b) => a - b)
+            .every(id => {
+                if (newId >= id) {
+                    newId = id + 1;
+                    return true;
+                }
+
+                return false;
+            });
+
+        return newId;
     }
 }
 
