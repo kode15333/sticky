@@ -9,6 +9,8 @@ import Folder from './models/Folder';
 class DOMRenderer extends Renderer {
     public $wrapper: HTMLElement;
 
+    public $folders: HTMLElement;
+
     public stickyTop: number = 0;
 
     public stickyLeft: number = 0;
@@ -28,12 +30,57 @@ class DOMRenderer extends Renderer {
             localStorage[FOLDER_LS] = JSON.stringify(this.app);
         } else {
             this.app = App.load(JSON.parse(localStorage[FOLDER_LS]));
-            this.currenFolder = 0;
         }
+        this.parent = parent;
+        this.currenFolder = 1;
         this.folder = this.app.getFolder(this.currenFolder);
-        this.$wrapper = parent.querySelector('#stickWrap')!;
+        this.$wrapper = parent.querySelector('#stickyContainer')!;
+        this.$folders = this.parent.querySelector('.folder-list')!;
         this.render();
+        this.addMenuEvent();
     }
+
+    setCurrentFolder = () => {
+        this.folder = this.app.getFolder(this.currenFolder);
+        this.render();
+    };
+
+    private addMenuEvent = () => {
+        const $menu = this.parent.querySelector('.sidebar-toggle')!;
+        const $app = this.parent.querySelector('#app')!;
+        const $list = this.parent.querySelector('.folder-list')!;
+        const $add = this.parent.querySelector('.folder-control .add')!;
+
+        $menu.addEventListener('click', () => {
+            $app.classList.toggle('active');
+        });
+
+        $list.addEventListener('click', e => {
+            const {
+                dataset: { id = 0 },
+            } = e.target as HTMLElement;
+            if (id < 1) return;
+
+            this.currenFolder = +id;
+            this.setCurrentFolder();
+        });
+
+        $add.addEventListener('click', () => {
+            let newFolderName = window.prompt(
+                'input folder label',
+                'new Folder'
+            );
+
+            if (!newFolderName || newFolderName.trim().length === 0) {
+                newFolderName = 'new Folder';
+            }
+
+            const id = this.app.getNewId();
+            this.app.addFolder(Folder.get(id, newFolderName));
+            this.currenFolder = id;
+            this.setCurrentFolder();
+        });
+    };
 
     private putStickyWithZIndex = (sticky: Sticky) => {
         let maxZIndex = -1;
@@ -115,7 +162,7 @@ class DOMRenderer extends Renderer {
 
         this.$wrapper.onmousemove = this.moveDrag;
         this.$wrapper.onmouseup = this.stopDrag;
-        this.dragSticky.style.zIndex = '999';
+        this.dragSticky.style.zIndex = '900';
         this.dragChangeZIndex(sticky);
     };
 
@@ -143,7 +190,7 @@ class DOMRenderer extends Renderer {
     };
 
     private addEvent = (el: HTMLElement, sticky: Sticky) => {
-        const localSave = document.querySelector('.localSave')!;
+        // const localSave = document.querySelector('.localSave')!;
 
         const addBtn = el.querySelector('.add')!;
         const saveBtn = el.querySelector('.save')!;
@@ -151,9 +198,9 @@ class DOMRenderer extends Renderer {
         const delBtn = el.querySelector('.del')!;
         const topNav = el.querySelector('.top_nav')!;
 
-        localSave.addEventListener('mousedown', () => {
-            localStorage[FOLDER_LS] = JSON.stringify(this.app);
-        });
+        // localSave.addEventListener('mousedown', () => {
+        //     localStorage[FOLDER_LS] = JSON.stringify(this.app);
+        // });
         addBtn.addEventListener('mousedown', this.handleAddBtn);
         saveBtn.addEventListener('mousedown', e =>
             this.handleSaveBtn(e, sticky)
@@ -180,14 +227,25 @@ class DOMRenderer extends Renderer {
         this.makeStickyHTML(sticky);
     }
 
+    private makeFolderHTML = (folder: Folder) => {
+        const { id, name } = folder;
+        const $li = document.createElement('li');
+        $li.dataset.id = `${id}`;
+        $li.style.color = `${this.currenFolder === id && 'blue'}`;
+        $li.innerHTML = name;
+        this.$folders.appendChild($li);
+    };
+
     _render() {
         console.log('render tasks');
         this.$wrapper.innerHTML = '';
-        const stickies: Sticky[] = this.folder.getStickies();
-        console.log(stickies);
+        const stickies = this.folder.getStickies();
         stickies.forEach(sticky => {
             this.createSticky(sticky);
         });
+        this.$folders.innerHTML = '';
+        const folders = this.app.getFolders();
+        folders.forEach(f => this.makeFolderHTML(f));
         localStorage[FOLDER_LS] = JSON.stringify(this.app);
     }
 }

@@ -8,9 +8,27 @@
 
 </head>
 <body>
-<button class='localSave'>LocalSave</button>
-<div id="stickWrap"></div>
-<h1 id="h1"></h1>
+<main id='app'>
+    <nav id='menu' class='sidebar'>
+        <div class='folder-Container'>
+            <ul class='folder-list'>
+            </ul>
+            <div class='folder-control'>
+                <button class='add'>Add Folder</button>
+                <button class='load'>Load Folder</button>
+            </div>
+        </div>
+    </nav>
+    <section class='stickySection'>
+        <button class='sidebar-toggle'>
+            <i class="fa fa-list"></i>
+        </button>
+        <section  id="stickyContainer">
+
+        </section>
+    </section>
+</main>
+
 <script type="module" src="./src/ts/index.ts"></script>
 </body>
 </html>
